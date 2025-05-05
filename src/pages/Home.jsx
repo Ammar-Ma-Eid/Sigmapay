@@ -47,7 +47,7 @@ function Home() {
             <div className="md:w-1/2 relative animate-slide-in-left" style={{ animationDelay: '300ms' }}>
               <div className="bg-white p-2 rounded-xl shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                 <img
-                  src="/Dashboard.png"
+                  src={`${import.meta.env.BASE_URL}Dashboard.png`}
                   alt="SigmaPay Dashboard Preview"
                   className="rounded-lg w-full h-auto"
                 />
@@ -200,21 +200,21 @@ function Home() {
               {
                 name: "Ammar Eid",
                 role: "Small Business Owner",
-                image: "/photo placeholder.png",
+                image: `${import.meta.env.BASE_URL}photo placeholder.png`,
                 quote: "SigmaPay has completely transformed how I manage my business finances. The budgeting tools and expense tracking have saved me hours every month.",
                 rating: 5
               },
               {
                 name: "Mohamed Ibrahim",
                 role: "Software Engineer",
-                image: "/photo placeholder.png",
+                image: `${import.meta.env.BASE_URL}photo placeholder.png`,
                 quote: "I've tried many financial apps, but SigmaPay stands out with its intuitive interface and powerful features. The investment recommendations have been spot on!",
                 rating: 5
               },
               {
                 name: "Andrew Gamal",
                 role: "Medical Student",
-                image: "/photo placeholder.png",
+                image: `${import.meta.env.BASE_URL}photo placeholder.png`,
                 quote: "As a student with limited income, SigmaPay has helped me stay on budget and even start saving. The group savings feature is a game-changer for shared expenses.",
                 rating: 4
               }
