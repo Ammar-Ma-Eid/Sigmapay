@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { 
-  ShoppingBagIcon, 
-  StarIcon, 
-  ShareIcon, 
+import {
+  ShoppingBagIcon,
+  StarIcon,
+  ShareIcon,
   TagIcon,
   FunnelIcon,
   BellAlertIcon
 } from '@heroicons/react/24/outline';
+import { getAssetPath } from '../utils/assets';
 
 function Partnerships() {
   const [activeTab, setActiveTab] = useState('offers');
   const [selectedCategories, setSelectedCategories] = useState(['all']);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [offers] = useState([
     {
       id: 1,
@@ -23,7 +24,7 @@ function Partnerships() {
       discount: '20%',
       expiryDate: '2024-06-30',
       code: 'SIGMAPAY20',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: true,
       rating: 4.5,
       reviews: 128,
@@ -38,7 +39,7 @@ function Partnerships() {
       discount: '$15',
       expiryDate: '2024-06-15',
       code: 'SIGMARIDE15',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: true,
       rating: 4.2,
       reviews: 95,
@@ -53,7 +54,7 @@ function Partnerships() {
       discount: '10% Cashback',
       expiryDate: '2024-07-31',
       code: 'AUTOMATIC',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: false,
       rating: 4.8,
       reviews: 210,
@@ -68,7 +69,7 @@ function Partnerships() {
       discount: 'Free Delivery',
       expiryDate: '2024-06-20',
       code: 'SIGMADASH',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: false,
       rating: 4.0,
       reviews: 75,
@@ -83,7 +84,7 @@ function Partnerships() {
       discount: '15%',
       expiryDate: '2024-07-15',
       code: 'SIGMANIKE15',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: false,
       rating: 4.3,
       reviews: 112,
@@ -98,14 +99,14 @@ function Partnerships() {
       discount: '5% Extra Cashback',
       expiryDate: '2024-08-31',
       code: 'AUTOMATIC',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: true,
       rating: 4.7,
       reviews: 189,
       saved: false
     }
   ]);
-  
+
   const [savedOffers] = useState([
     {
       id: 2,
@@ -116,7 +117,7 @@ function Partnerships() {
       discount: '$15',
       expiryDate: '2024-06-15',
       code: 'SIGMARIDE15',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: true,
       rating: 4.2,
       reviews: 95,
@@ -133,7 +134,7 @@ function Partnerships() {
       discount: 'Free Delivery',
       expiryDate: '2024-06-20',
       code: 'SIGMADASH',
-      image: 'https://via.placeholder.com/150',
+      image: getAssetPath('offer.jpg'),
       featured: false,
       rating: 4.0,
       reviews: 75,
@@ -142,7 +143,7 @@ function Partnerships() {
       remainingUses: 3
     }
   ]);
-  
+
   const [redeemHistory] = useState([
     {
       id: 101,
@@ -185,7 +186,7 @@ function Partnerships() {
       transactionAmount: 123.50
     }
   ]);
-  
+
   const categories = [
     { id: 'all', name: 'All Categories' },
     { id: 'shopping', name: 'Shopping' },
@@ -195,15 +196,15 @@ function Partnerships() {
     { id: 'groceries', name: 'Groceries' },
     { id: 'entertainment', name: 'Entertainment' }
   ];
-  
+
   const toggleCategory = (categoryId) => {
     if (categoryId === 'all') {
       setSelectedCategories(['all']);
       return;
     }
-    
+
     const newSelectedCategories = selectedCategories.filter(id => id !== 'all');
-    
+
     if (newSelectedCategories.includes(categoryId)) {
       const filtered = newSelectedCategories.filter(id => id !== categoryId);
       setSelectedCategories(filtered.length === 0 ? ['all'] : filtered);
@@ -211,22 +212,22 @@ function Partnerships() {
       setSelectedCategories([...newSelectedCategories, categoryId]);
     }
   };
-  
+
   const filteredOffers = offers.filter(offer => {
     // Filter by search query
-    if (searchQuery && !offer.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !offer.merchant.toLowerCase().includes(searchQuery.toLowerCase())) {
+    if (searchQuery && !offer.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !offer.merchant.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
-    
+
     // Filter by category
     if (selectedCategories.includes('all')) {
       return true;
     }
-    
+
     return selectedCategories.includes(offer.category);
   });
-  
+
   const totalSavings = redeemHistory.reduce((sum, item) => sum + item.savings, 0);
 
   const renderTabContent = () => {
@@ -236,9 +237,9 @@ function Partnerships() {
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="relative w-full md:w-64">
-                <input 
-                  type="text" 
-                  placeholder="Search offers..." 
+                <input
+                  type="text"
+                  placeholder="Search offers..."
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -247,18 +248,17 @@ function Partnerships() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              
+
               <div className="flex items-center space-x-2 overflow-x-auto pb-2 w-full md:w-auto">
                 <FunnelIcon className="h-5 w-5 text-gray-500" />
                 <span className="text-sm text-gray-500">Filter:</span>
                 {categories.map(category => (
                   <button
                     key={category.id}
-                    className={`px-3 py-1 text-xs rounded-full ${
-                      selectedCategories.includes(category.id) 
-                        ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
-                        : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
-                    }`}
+                    className={`px-3 py-1 text-xs rounded-full ${selectedCategories.includes(category.id)
+                      ? 'bg-indigo-100 text-indigo-700 border border-indigo-300'
+                      : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200'
+                      }`}
                     onClick={() => toggleCategory(category.id)}
                   >
                     {category.name}
@@ -266,15 +266,15 @@ function Partnerships() {
                 ))}
               </div>
             </div>
-            
+
             {filteredOffers.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredOffers.map((offer) => (
                   <div key={offer.id} className="card hover:shadow-md transition-shadow">
                     <div className="relative">
-                      <img 
-                        src={offer.image} 
-                        alt={offer.merchant} 
+                      <img
+                        src={offer.image}
+                        alt={offer.merchant}
                         className="w-full h-40 object-cover rounded-t-lg"
                       />
                       {offer.featured && (
@@ -286,7 +286,7 @@ function Partnerships() {
                         Expires: {new Date(offer.expiryDate).toLocaleDateString()}
                       </span>
                     </div>
-                    
+
                     <div className="p-4">
                       <div className="flex justify-between items-start">
                         <h4 className="font-semibold text-lg">{offer.title}</h4>
@@ -296,7 +296,7 @@ function Partnerships() {
                       </div>
                       <p className="text-gray-500 text-sm mt-1">{offer.merchant}</p>
                       <p className="mt-2 text-gray-700 text-sm">{offer.description}</p>
-                      
+
                       <div className="mt-3 flex items-center">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(Math.floor(offer.rating))}
@@ -304,7 +304,7 @@ function Partnerships() {
                         </div>
                         <span className="ml-1 text-xs text-gray-500">({offer.reviews})</span>
                       </div>
-                      
+
                       <div className="mt-4 flex justify-between items-center">
                         <div>
                           <p className="text-xs text-gray-500">Promo Code:</p>
@@ -323,7 +323,7 @@ function Partnerships() {
                           {offer.saved ? 'Saved' : 'Save Offer'}
                         </button>
                       </div>
-                      
+
                       <div className="mt-3 pt-3 border-t flex justify-between text-xs text-gray-500">
                         <button className="flex items-center hover:text-indigo-600">
                           <ShareIcon className="h-4 w-4 mr-1" />
@@ -351,27 +351,27 @@ function Partnerships() {
             )}
           </div>
         );
-      
+
       case 'saved':
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold">Saved Offers</h3>
-            
+
             {savedOffers.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {savedOffers.map((offer) => (
                   <div key={offer.id} className="card hover:shadow-md transition-shadow">
                     <div className="relative">
-                      <img 
-                        src={offer.image} 
-                        alt={offer.merchant} 
+                      <img
+                        src={offer.image}
+                        alt={offer.merchant}
                         className="w-full h-40 object-cover rounded-t-lg"
                       />
                       <span className="absolute top-2 right-2 bg-white/90 text-gray-800 text-xs px-2 py-1 rounded-full">
                         Expires: {new Date(offer.expiryDate).toLocaleDateString()}
                       </span>
                     </div>
-                    
+
                     <div className="p-4">
                       <div className="flex justify-between items-start">
                         <h4 className="font-semibold text-lg">{offer.title}</h4>
@@ -380,7 +380,7 @@ function Partnerships() {
                         </span>
                       </div>
                       <p className="text-gray-500 text-sm mt-1">{offer.merchant}</p>
-                      
+
                       <div className="mt-3 bg-indigo-50 p-3 rounded-lg">
                         <div className="flex justify-between items-center">
                           <div>
@@ -390,14 +390,14 @@ function Partnerships() {
                             </p>
                           </div>
                           <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-indigo-600 rounded-full" 
+                            <div
+                              className="h-full bg-indigo-600 rounded-full"
                               style={{ width: `${(offer.usedCount / (offer.usedCount + offer.remainingUses)) * 100}%` }}
                             ></div>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4 flex justify-between items-center">
                         <div>
                           <p className="text-xs text-gray-500">Promo Code:</p>
@@ -416,7 +416,7 @@ function Partnerships() {
                           Use Now
                         </button>
                       </div>
-                      
+
                       <div className="mt-3 pt-3 border-t flex justify-between text-xs text-gray-500">
                         <button className="flex items-center hover:text-indigo-600">
                           <ShareIcon className="h-4 w-4 mr-1" />
@@ -438,7 +438,7 @@ function Partnerships() {
                 <TagIcon className="h-16 w-16 text-gray-300" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">No saved offers</h3>
                 <p className="mt-1 text-gray-500">Browse available offers and save them for later use.</p>
-                <button 
+                <button
                   className="mt-4 btn-primary"
                   onClick={() => setActiveTab('offers')}
                 >
@@ -448,7 +448,7 @@ function Partnerships() {
             )}
           </div>
         );
-      
+
       case 'history':
         return (
           <div className="space-y-6">
@@ -464,7 +464,7 @@ function Partnerships() {
                 <option>This Year</option>
               </select>
             </div>
-            
+
             <div className="card">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -504,7 +504,7 @@ function Partnerships() {
                   </tbody>
                 </table>
               </div>
-              
+
               <div className="mt-4 flex justify-between items-center">
                 <p className="text-sm text-gray-500">Showing 5 of 12 redemptions</p>
                 <div className="flex space-x-2">
@@ -516,7 +516,7 @@ function Partnerships() {
                 </div>
               </div>
             </div>
-            
+
             <div className="card">
               <h4 className="font-semibold mb-4">Savings Overview</h4>
               <div className="h-64 flex items-center justify-center bg-gray-100 rounded-lg">
@@ -526,7 +526,7 @@ function Partnerships() {
             </div>
           </div>
         );
-      
+
       default:
         return null;
     }
@@ -538,7 +538,7 @@ function Partnerships() {
         <h1 className="text-3xl font-bold text-gray-900">Partnerships & Offers</h1>
         <p className="mt-2 text-gray-600">Discover exclusive deals and discounts from our partners.</p>
       </div>
-      
+
       <div className="mb-6">
         <nav className="flex space-x-4 overflow-x-auto pb-2">
           <button
@@ -561,7 +561,7 @@ function Partnerships() {
           </button>
         </nav>
       </div>
-      
+
       {renderTabContent()}
     </div>
   );
