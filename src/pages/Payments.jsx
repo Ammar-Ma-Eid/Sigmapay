@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../utils/auth';
 import { getContacts, saveTransaction } from '../utils/storage';
+import { useFinance } from '../contexts/FinanceContext';
 
 const PAYMENT_CATEGORIES = [
   'Transfer',
@@ -15,6 +16,7 @@ const PAYMENT_CATEGORIES = [
 
 function Payments() {
   const navigate = useNavigate();
+  const { addUserExpense } = useFinance();
   const [contacts, setContacts] = useState([]);
   const [formData, setFormData] = useState({
     recipient: '',
@@ -23,6 +25,8 @@ function Payments() {
     notes: ''
   });
   const [isReviewing, setIsReviewing] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -33,20 +37,55 @@ function Payments() {
     setContacts(getContacts());
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  // Map payment categories to budget categories
+  const mapCategoryToBudget = (paymentCategory) => {
+    const categoryMap = {
+      'Shopping': 'shopping',
+      'Bills': 'utilities',
+      'Entertainment': 'entertainment',
+      'Food': 'food',
+      'Transportation': 'transportation',
+      'Transfer': 'other',
+      'Other': 'other'
+    };
+    return categoryMap[paymentCategory] || 'other';
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (!isReviewing) {
       setIsReviewing(true);
       return;
     }
 
-    const transaction = saveTransaction({
-      ...formData,
-      amount: parseFloat(formData.amount),
-      type: 'payment'
-    });
+    try {
+      // Save the transaction
+      const transaction = saveTransaction({
+        ...formData,
+        amount: parseFloat(formData.amount),
+        type: 'payment'
+      });
 
-    navigate(`/receipt/${transaction.id}`);
+      // Add the payment as an expense to update the budget
+      await addUserExpense({
+        description: `Payment to ${formData.recipient}`,
+        amount: parseFloat(formData.amount),
+        categoryId: mapCategoryToBudget(formData.category),
+        date: new Date().toISOString(),
+        paymentId: transaction.id
+      });
+
+      setSuccess('Payment successful!');
+
+      // Navigate to receipt page after a short delay to show success message
+      setTimeout(() => {
+        navigate(`/receipt/${transaction.id}`);
+      }, 1000);
+    } catch (err) {
+      setError(err.message || 'An error occurred while processing your payment');
+    }
   };
 
   return (
@@ -54,6 +93,18 @@ function Payments() {
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">
         {isReviewing ? 'Review Payment' : 'Make a Payment'}
       </h1>
+
+      {error && (
+        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {success}
+        </div>
+      )}
 
       <div className="card">
         <form onSubmit={handleSubmit}>

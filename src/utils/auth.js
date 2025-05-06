@@ -1,3 +1,5 @@
+import { getAssetPath } from './assets';
+
 // Local storage keys
 const USERS_KEY = 'sigmapay_users';
 const CURRENT_USER_KEY = 'sigmapay_current_user';
@@ -10,7 +12,7 @@ const DEFAULT_USER_DATA = {
   budgetPlan: 3000,
   spendingLimit: 2000,
   savingsGoal: 1000,
-  profileImage: '/photo placeholder.png', // Use placeholder image by default
+  profileImage: getAssetPath('photo placeholder.png'), // Use placeholder image by default
   isVerified: true, // Set to true to skip email verification
   verificationCode: null,
   preferences: {

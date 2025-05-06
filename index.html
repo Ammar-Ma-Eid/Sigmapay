@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <base href="/Sigmapay/" />
+  <link rel="icon" type="image/svg+xml" href="sigmapay-logo.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SigmaPay</title>
+  <title>SigmaPay - Smart Banking for a Brighter Future</title>
   <!-- Start Single Page Apps for GitHub Pages -->
   <script type="text/javascript">
     // Single Page Apps for GitHub Pages
@@ -23,11 +24,19 @@
     }(window.location))
   </script>
   <!-- End Single Page Apps for GitHub Pages -->
+
+  <!-- Debug script for routing issues -->
+  <script type="text/javascript">
+    console.log('Current URL:', window.location.href);
+    console.log('Base URL:', document.querySelector('base').href);
+    console.log('Pathname:', window.location.pathname);
+    console.log('Hash:', window.location.hash);
+  </script>
 </head>
 
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
+  <script type="module" src="src/main.jsx"></script>
 </body>
 
 </html>

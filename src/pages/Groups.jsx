@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '../utils/auth';
 import { getGroups, saveGroup, joinGroup, addContribution } from '../utils/storage';
 import { PlusIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { navigateTo } from '../utils/url';
 
 function Groups() {
   const navigate = useNavigate();
@@ -18,7 +19,8 @@ function Groups() {
   useEffect(() => {
     const user = getCurrentUser();
     if (!user) {
-      navigate('/login');
+      // Use navigateTo instead of navigate for direct URL navigation
+      navigateTo('login');
       return;
     }
     loadGroups();

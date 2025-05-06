@@ -1,7 +1,11 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-function ProtectedRoute({ children }) {
+/**
+ * Protected layout component that checks authentication
+ * and redirects to login if user is not authenticated
+ */
+function ProtectedLayout() {
   const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
@@ -21,7 +25,7 @@ function ProtectedRoute({ children }) {
   }
 
   // User is authenticated, render the protected content
-  return children;
+  return <Outlet />;
 }
 
-export default ProtectedRoute;
+export default ProtectedLayout;

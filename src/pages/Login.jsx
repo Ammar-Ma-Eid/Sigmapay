@@ -1,14 +1,20 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { loginUser } from '../utils/auth';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { loginUser, error: authError, loading } = useAuth();
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [error, setError] = useState('');
+
+  // Get the redirect path from location state or default to dashboard
+  const from = location.state?.from || '/dashboard';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,12 +29,12 @@ function Login() {
     setError('');
 
     try {
-      const user = await loginUser(formData.email, formData.password);
-
-      // Force a page reload to update the navbar with the user's authentication state
-      window.location.href = '/dashboard';
+      await loginUser(formData.email, formData.password);
+      console.log('User logged in successfully, redirecting to:', from);
+      navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message);
+      console.error('Error during login:', err);
+      setError(err.message || 'Login failed. Please try again.');
     }
   };
 
@@ -55,6 +61,7 @@ function Login() {
               value={formData.email}
               onChange={handleChange}
               className="input-field"
+              disabled={loading}
               required
             />
           </div>
@@ -70,6 +77,7 @@ function Login() {
               value={formData.password}
               onChange={handleChange}
               className="input-field"
+              disabled={loading}
               required
             />
             <div className="flex justify-end mt-1">
@@ -79,8 +87,20 @@ function Login() {
             </div>
           </div>
 
-          <button type="submit" className="w-full btn-primary mb-4">
-            Login
+          <button
+            type="submit"
+            className={`w-full btn-primary mb-4 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Logging in...
+              </span>
+            ) : 'Login'}
           </button>
         </form>
 

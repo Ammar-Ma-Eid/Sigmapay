@@ -1,8 +1,23 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaTwitter, FaInstagram, FaLinkedin, FaChartLine, FaMoneyBillWave, FaCreditCard, FaUserShield, FaUsers, FaLightbulb, FaMobileAlt } from 'react-icons/fa';
 import { HiOutlineArrowNarrowRight } from 'react-icons/hi';
+import { getAssetPath } from '../utils/assets';
+import { useAuth } from '../contexts/AuthContext';
 
 function Home() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
+  // Function to handle navigation based on authentication status
+  const handleAuthNavigation = (e, defaultPath) => {
+    e.preventDefault();
+    if (isAuthenticated()) {
+      navigate('/dashboard');
+    } else {
+      navigate(defaultPath);
+    }
+  };
+
   return (
     <div className="font-sans bg-gradient-to-b from-white to-indigo-50 min-h-screen flex flex-col justify-between">
       <div className="max-w-7xl mx-auto px-4 py-12 flex-grow">
@@ -24,19 +39,21 @@ function Home() {
                 Manage your money, achieve your goals, and build wealth with our all-in-one financial platform.
               </p>
               <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-up" style={{ animationDelay: '200ms' }}>
-                <Link
-                  to="/signup"
+                <a
+                  href="#"
+                  onClick={(e) => handleAuthNavigation(e, '/signup')}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg transition-transform duration-300 hover:scale-105 flex items-center justify-center"
                 >
-                  Get Started Free
+                  {isAuthenticated() ? 'Go to Dashboard' : 'Get Started Free'}
                   <HiOutlineArrowNarrowRight className="ml-2" />
-                </Link>
-                <Link
-                  to="/login"
+                </a>
+                <a
+                  href="#"
+                  onClick={(e) => handleAuthNavigation(e, '/login')}
                   className="bg-white border-2 border-indigo-600 text-indigo-700 hover:bg-indigo-50 px-8 py-3 rounded-full text-lg font-semibold shadow-md transition-transform duration-300 hover:scale-105"
                 >
-                  Login
-                </Link>
+                  {isAuthenticated() ? 'Dashboard' : 'Login'}
+                </a>
               </div>
               <div className="mt-6 text-gray-600 text-sm animate-fade-in" style={{ animationDelay: '400ms' }}>
                 <p>No credit card required • Free plan available</p>
@@ -47,7 +64,7 @@ function Home() {
             <div className="md:w-1/2 relative animate-slide-in-left" style={{ animationDelay: '300ms' }}>
               <div className="bg-white p-2 rounded-xl shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
                 <img
-                  src="/Dashboard.png"
+                  src={getAssetPath('Dashboard.png')}
                   alt="SigmaPay Dashboard Preview"
                   className="rounded-lg w-full h-auto"
                 />
@@ -200,21 +217,21 @@ function Home() {
               {
                 name: "Ammar Eid",
                 role: "Small Business Owner",
-                image: "/photo placeholder.png",
+                image: getAssetPath('photo placeholder.png'),
                 quote: "SigmaPay has completely transformed how I manage my business finances. The budgeting tools and expense tracking have saved me hours every month.",
                 rating: 5
               },
               {
                 name: "Mohamed Ibrahim",
                 role: "Software Engineer",
-                image: "/photo placeholder.png",
+                image: getAssetPath('photo placeholder.png'),
                 quote: "I've tried many financial apps, but SigmaPay stands out with its intuitive interface and powerful features. The investment recommendations have been spot on!",
                 rating: 5
               },
               {
                 name: "Andrew Gamal",
                 role: "Medical Student",
-                image: "/photo placeholder.png",
+                image: getAssetPath('photo placeholder.png'),
                 quote: "As a student with limited income, SigmaPay has helped me stay on budget and even start saving. The group savings feature is a game-changer for shared expenses.",
                 rating: 4
               }
@@ -256,10 +273,14 @@ function Home() {
           </div>
 
           <div className="text-center mt-10 animate-fade-in" style={{ animationDelay: '800ms' }}>
-            <Link to="/signup" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg transition-transform duration-300 hover:scale-105 inline-flex items-center">
-              Join Them Today
+            <a
+              href="#"
+              onClick={(e) => handleAuthNavigation(e, '/signup')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-lg font-semibold shadow-lg transition-transform duration-300 hover:scale-105 inline-flex items-center"
+            >
+              {isAuthenticated() ? 'Go to Dashboard' : 'Join Them Today'}
               <HiOutlineArrowNarrowRight className="ml-2" />
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -330,18 +351,20 @@ function Home() {
             Join thousands of users who have transformed their financial lives with SigmaPay.
           </p>
           <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-slide-up" style={{ animationDelay: '200ms' }}>
-            <Link
-              to="/signup"
+            <a
+              href="#"
+              onClick={(e) => handleAuthNavigation(e, '/signup')}
               className="bg-white text-indigo-600 hover:bg-gray-100 px-8 py-3 rounded-full text-lg font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
-              Get Started Free
-            </Link>
-            <Link
-              to="/login"
+              {isAuthenticated() ? 'Go to Dashboard' : 'Get Started Free'}
+            </a>
+            <a
+              href="#"
+              onClick={(e) => handleAuthNavigation(e, isAuthenticated() ? '/dashboard' : '/login')}
               className="bg-transparent border-2 border-white text-white hover:bg-white/10 px-8 py-3 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
-              Learn More
-            </Link>
+              {isAuthenticated() ? 'View Dashboard' : 'Login'}
+            </a>
           </div>
         </div>
       </div>

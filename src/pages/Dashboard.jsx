@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '../utils/auth';
-import { getBudgetOverview, getCategoryBudgets } from '../utils/budget';
+import { useAuth } from '../contexts/AuthContext';
+import { useFinance } from '../contexts/FinanceContext';
+import IncomeInput from '../components/IncomeInput';
+import BudgetBreakdown from '../components/BudgetBreakdown';
+import ExpenseTracker from '../components/ExpenseTracker';
+import BudgetCustomizer from '../components/BudgetCustomizer';
+import FinancialGoals from '../components/FinancialGoals';
+import FinancialHealthScore from '../components/FinancialHealthScore';
+import BudgetVisualization from '../components/BudgetVisualization';
 import {
   CurrencyDollarIcon,
   ChartBarIcon,
@@ -19,84 +26,63 @@ import {
 
 function Dashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [financialData, setFinancialData] = useState({
-    totalIncome: 5000,
-    budgetPlan: 3000,
-    spendingLimit: 2000,
-    savingsGoal: 1000
-  });
+  const { user } = useAuth();
+  const {
+    income,
+    budgetPlan,
+    spendingLimit,
+    savingsGoal,
+    expenses,
+    loading
+  } = useFinance();
 
-  const [recentTransactions] = useState([
-    {
-      id: 'TX-001',
-      date: '2024-03-15',
-      recipient: 'Andrew Gamal',
-      amount: 150.00,
-      type: 'payment',
-      category: 'Transfer'
-    },
-    {
-      id: 'TX-002',
-      date: '2024-03-14',
-      recipient: 'Mohamed Ibrahim',
-      amount: 85.50,
-      type: 'payment',
-      category: 'Shopping'
-    },
-    {
-      id: 'TX-003',
-      date: '2024-03-13',
-      recipient: 'Omar Aly',
-      amount: 200.00,
-      type: 'savings',
-      category: 'Group Savings'
-    }
-  ]);
+  // Get recent transactions from expenses
+  const recentTransactions = expenses.slice(0, 3).map(expense => ({
+    id: expense.id,
+    date: expense.date,
+    recipient: expense.description,
+    amount: expense.amount,
+    type: 'expense',
+    category: expense.categoryId
+  }));
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
+    if (!user) {
       navigate('/login');
-      return;
     }
-    setUser(currentUser);
-  }, [navigate]);
+  }, [user, navigate]);
 
   const summaryCards = [
     {
       title: 'Total Income',
-      amount: financialData.totalIncome,
+      amount: income,
       icon: CurrencyDollarIcon,
       color: 'bg-green-100 text-green-600'
     },
     {
       title: 'Budget Plan',
-      amount: financialData.budgetPlan,
+      amount: budgetPlan,
       icon: ChartBarIcon,
       color: 'bg-blue-100 text-blue-600'
     },
     {
       title: 'Spending Limit',
-      amount: financialData.spendingLimit,
+      amount: spendingLimit,
       icon: ArrowTrendingUpIcon,
       color: 'bg-yellow-100 text-yellow-600'
     },
     {
       title: 'Savings Goal',
-      amount: financialData.savingsGoal,
+      amount: savingsGoal,
       icon: UserGroupIcon,
       color: 'bg-purple-100 text-purple-600'
     }
   ];
 
-  const userId = 'currentUser'; // Replace with actual user ID from authentication
-  const overview = getBudgetOverview(userId);
-  const categories = getCategoryBudgets(userId);
-
-  const topCategories = categories
-    .sort((a, b) => b.spent - a.spent)
-    .slice(0, 3);
+  // We don't need these anymore as we're using the FinanceContext
+  // const userId = 'currentUser';
+  // const overview = getBudgetOverview(userId);
+  // const categories = getCategoryBudgets(userId);
 
   if (!user) {
     return null;
@@ -106,8 +92,13 @@ function Dashboard() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="py-8">
         <h1 className="text-2xl font-semibold text-gray-900">
-          Welcome back, {user.firstName}!
+          Welcome back, {user?.firstName || 'User'}!
         </h1>
+
+        {/* Financial Health Score */}
+        <div className="mt-8">
+          <FinancialHealthScore />
+        </div>
 
         {/* Summary Cards */}
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -119,61 +110,31 @@ function Dashboard() {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-medium text-gray-900">{card.title}</h3>
-                  <p className="text-2xl font-semibold">${card.amount.toLocaleString()}</p>
+                  <p className="text-2xl font-semibold">${card.amount?.toLocaleString() || '0'}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Budget Summary Card */}
-        <div className="mt-8 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold">Budget Summary</h2>
-          <p>Total Budget: ${overview.total}</p>
-          <p>Spent: ${overview.spent}</p>
-          <p>Remaining: ${overview.remaining}</p>
-
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Top Spending Categories</h3>
-            <ul>
-              {topCategories.map((category) => (
-                <li key={category.categoryId} className="flex justify-between">
-                  <span>{category.categoryName}</span>
-                  <span>${category.spent} / ${category.amount}</span>
-                </li>
-              ))}
-            </ul>
+        {/* Two-column layout for main components */}
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            {/* Income Input Component */}
+            <IncomeInput />
+            {/* Budget Visualization */}
+            <BudgetVisualization />
+            {/* Expense Tracker */}
+            <ExpenseTracker />
           </div>
 
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Budget Usage</h3>
-            <div className="w-full bg-gray-200 rounded-full h-4">
-              <div
-                className="bg-blue-600 h-4 rounded-full"
-                style={{ width: `${(overview.spent / overview.total) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {categories.some((category) => category.spent > category.amount) && (
-            <div className="mt-4 text-red-500">
-              <h3 className="text-lg font-semibold">Budget Alerts</h3>
-              <ul>
-                {categories
-                  .filter((category) => category.spent > category.amount)
-                  .map((alert) => (
-                    <li key={alert.categoryId}>
-                      {alert.categoryName} has exceeded its budget!
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="mt-4">
-            <Link to="/budget" className="text-blue-500 hover:underline">
-              View Budget Details
-            </Link>
+          <div className="space-y-4">
+            {/* Budget Customizer */}
+            <BudgetCustomizer />
+            {/* Financial Goals */}
+            <FinancialGoals />
+            {/* Budget Breakdown Component */}
+            <BudgetBreakdown />
           </div>
         </div>
 
@@ -317,55 +278,65 @@ function Dashboard() {
             </Link>
           </div>
           <div className="card">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Recipient
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {recentTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(transaction.date).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.recipient}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {transaction.category}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${transaction.amount.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <Link
-                          to={`/receipt/${transaction.id}`}
-                          className="text-primary hover:text-secondary"
-                        >
-                          View Receipt
-                        </Link>
-                      </td>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+              </div>
+            ) : recentTransactions.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {recentTransactions.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(transaction.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {transaction.recipient}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {transaction.category}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${transaction.amount.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <Link
+                            to={`/receipt/${transaction.id}`}
+                            className="text-primary hover:text-secondary"
+                          >
+                            View Details
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No transactions recorded yet. Add expenses to see them here.
+              </div>
+            )}
           </div>
         </div>
 

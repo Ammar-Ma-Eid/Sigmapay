@@ -4,6 +4,7 @@ import { getCurrentUser } from '../utils/auth';
 import { getTransaction } from '../utils/storage';
 import { QRCodeSVG } from 'qrcode.react';
 import { jsPDF } from 'jspdf';
+import { navigateTo } from '../utils/url';
 
 function Receipt() {
   const { id } = useParams();
@@ -13,13 +14,15 @@ function Receipt() {
   useEffect(() => {
     const user = getCurrentUser();
     if (!user) {
-      navigate('/login');
+      // Use navigateTo instead of navigate for direct URL navigation
+      navigateTo('login');
       return;
     }
 
     const tx = getTransaction(id);
     if (!tx) {
-      navigate('/transactions');
+      // Use navigateTo instead of navigate for direct URL navigation
+      navigateTo('transactions');
       return;
     }
     setTransaction(tx);
@@ -27,11 +30,11 @@ function Receipt() {
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-    
+
     // Add receipt content to PDF
     doc.setFontSize(20);
     doc.text('SIGMAPAY Receipt', 105, 20, { align: 'center' });
-    
+
     doc.setFontSize(12);
     doc.text(`Transaction ID: ${transaction.id}`, 20, 40);
     doc.text(`Date: ${new Date(transaction.date).toLocaleString()}`, 20, 50);
@@ -39,12 +42,12 @@ function Receipt() {
     doc.text(`Amount: $${transaction.amount.toFixed(2)}`, 20, 70);
     doc.text(`Category: ${transaction.category}`, 20, 80);
     doc.text(`Status: ${transaction.status}`, 20, 90);
-    
+
     if (transaction.notes) {
       doc.text('Notes:', 20, 100);
       doc.text(transaction.notes, 20, 110);
     }
-    
+
     // Save the PDF
     doc.save(`receipt-${transaction.id}.pdf`);
   };

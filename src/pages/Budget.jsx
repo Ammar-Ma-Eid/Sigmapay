@@ -1,27 +1,136 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { getBudgetOverview, getCategoryBudgets, addExpense, getExpenses } from '../utils/budget';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { useFinance } from '../contexts/FinanceContext';
+import { useAuth } from '../contexts/AuthContext';
+import {
+    PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
+    LineChart, Line, AreaChart, Area
+} from 'recharts';
+import {
+    ArrowDownIcon, ArrowUpIcon, ExclamationCircleIcon,
+    ChartBarIcon, ChartPieIcon, ArrowPathIcon, FunnelIcon,
+    CalendarIcon, CurrencyDollarIcon, DocumentTextIcon
+} from '@heroicons/react/24/outline';
 
 function Budget() {
-    const [overview, setOverview] = useState(getBudgetOverview());
-    const [categories, setCategories] = useState(getCategoryBudgets());
-    const [expenses, setExpenses] = useState(getExpenses());
-    const [newExpense, setNewExpense] = useState({ category: '', amount: 0, description: '' });
-    const [alerts, setAlerts] = useState([]);
+    const { user } = useAuth();
+    const {
+        income,
+        budgetCategories,
+        expenses,
+        addUserExpense,
+        updateBudgetSettings,
+        loading
+    } = useFinance();
 
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+    // State for UI controls
+    const [activeTab, setActiveTab] = useState('overview');
+    const [chartType, setChartType] = useState('pie');
+    const [timeFilter, setTimeFilter] = useState('month');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [sortBy, setSortBy] = useState('amount');
+    const [newExpense, setNewExpense] = useState({
+        description: '',
+        amount: '',
+        categoryId: '',
+        date: new Date().toISOString().split('T')[0]
+    });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleAddExpense = () => {
-        addExpense(newExpense);
-        setExpenses(getExpenses());
-        setOverview(getBudgetOverview());
-        checkAlerts();
-    };
+    // Colors for charts
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff8042'];
 
-    const checkAlerts = () => {
-        const newAlerts = categories.filter(category => category.spent > category.budget);
-        setAlerts(newAlerts);
+    // Calculate budget overview
+    const budgetOverview = useMemo(() => {
+        if (!budgetCategories || Object.keys(budgetCategories).length === 0) {
+            return { total: 0, spent: 0, remaining: 0, percentUsed: 0 };
+        }
+
+        const total = Object.values(budgetCategories).reduce((sum, cat) => sum + cat.amount, 0);
+        const spent = Object.values(budgetCategories).reduce((sum, cat) => sum + (cat.spent || 0), 0);
+        const remaining = total - spent;
+        const percentUsed = total > 0 ? (spent / total) * 100 : 0;
+
+        return { total, spent, remaining, percentUsed };
+    }, [budgetCategories]);
+
+    // Format categories for charts
+    const formattedCategories = useMemo(() => {
+        if (!budgetCategories) return [];
+
+        return Object.entries(budgetCategories).map(([key, category]) => ({
+            id: key,
+            name: category.name || key,
+            budget: category.amount || 0,
+            spent: category.spent || 0,
+            remaining: (category.amount || 0) - (category.spent || 0),
+            percentage: category.amount > 0 ? ((category.spent || 0) / category.amount) * 100 : 0
+        }));
+    }, [budgetCategories]);
+
+    // Get alerts for categories over budget
+    const alerts = useMemo(() => {
+        return formattedCategories.filter(cat => cat.spent > cat.budget);
+    }, [formattedCategories]);
+
+    // Group expenses by month for trend analysis
+    const expensesByMonth = useMemo(() => {
+        if (!expenses || expenses.length === 0) return [];
+
+        const grouped = {};
+
+        expenses.forEach(expense => {
+            const date = new Date(expense.date);
+            const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+            if (!grouped[monthYear]) {
+                grouped[monthYear] = { month: monthYear, total: 0 };
+            }
+
+            grouped[monthYear].total += expense.amount;
+        });
+
+        return Object.values(grouped).sort((a, b) => a.month.localeCompare(b.month));
+    }, [expenses]);
+
+    // Handle adding a new expense
+    const handleAddExpense = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+
+        try {
+            if (!newExpense.description) {
+                throw new Error('Please enter a description');
+            }
+
+            if (!newExpense.amount || parseFloat(newExpense.amount) <= 0) {
+                throw new Error('Please enter a valid amount');
+            }
+
+            if (!newExpense.categoryId) {
+                throw new Error('Please select a category');
+            }
+
+            await addUserExpense({
+                ...newExpense,
+                amount: parseFloat(newExpense.amount)
+            });
+
+            setSuccess('Expense added successfully!');
+
+            // Reset form
+            setNewExpense({
+                description: '',
+                amount: '',
+                categoryId: '',
+                date: new Date().toISOString().split('T')[0]
+            });
+        } catch (err) {
+            setError(err.message);
+        }
     };
 
     return (

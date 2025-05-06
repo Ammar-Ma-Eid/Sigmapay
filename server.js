@@ -3,9 +3,15 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import Input from './models/Input.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Load environment variables
 dotenv.config();
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,8 +25,12 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('Connected to MongoDB Atlas'))
     .catch((err) => console.error('Error connecting to MongoDB:', err));
 
+// Serve static files from the React app
+app.use('/Sigmapay', express.static(path.join(__dirname, 'dist')));
+console.log('Serving static files from:', path.join(__dirname, 'dist'));
+
 // Basic Route
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.send('Backend is running');
 });
 
@@ -36,7 +46,26 @@ app.post('/api/inputs', async (req, res) => {
     }
 });
 
+// Catch-all route to serve the React app for all other routes
+app.get('/Sigmapay/*', (req, res) => {
+    console.log('Catch-all route hit, serving index.html for path:', req.path);
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+// Additional catch-all route for direct dashboard access
+app.get('/dashboard', (_req, res) => {
+    console.log('Redirecting /dashboard to /Sigmapay/#/dashboard');
+    res.redirect('/Sigmapay/#/dashboard');
+});
+
+// General catch-all route for any other routes that should be handled by the React app
+app.get('*', (req, res) => {
+    console.log('General catch-all route hit, redirecting to Sigmapay for path:', req.path);
+    res.redirect('/Sigmapay/');
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`React app is available at http://localhost:${PORT}/Sigmapay/`);
 });

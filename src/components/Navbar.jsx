@@ -1,22 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import { isAuthenticated, getCurrentUser, logoutUser } from '../utils/auth';
+import { useAuth } from '../contexts/AuthContext';
+import NotificationCenter from './NotificationCenter';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [user, setUser] = useState(null);
   const dropdownRefs = useRef({});
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Check authentication status and get user data
-    if (isAuthenticated()) {
-      setUser(getCurrentUser());
-    } else {
-      setUser(null);
-    }
-  }, []);
+  const { user, logoutUser } = useAuth();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -39,8 +31,7 @@ function Navbar() {
   // Handle logout
   const handleLogout = () => {
     logoutUser();
-    setUser(null);
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   // Navbar categories and their items - only shown when authenticated
@@ -193,6 +184,8 @@ function Navbar() {
           <div className="hidden md:flex space-x-3 items-center">
             {user ? (
               <div className="flex items-center space-x-3">
+                <NotificationCenter />
+
                 <Link to="/profile" className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 transition duration-200">
                   <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden">
                     {user.profileImage ? (
